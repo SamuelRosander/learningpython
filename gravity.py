@@ -71,6 +71,11 @@ class Particle(object):
         if abs(self.vx) < 0.05:
             self.vx = 0
 
+        # y top bounce
+        if self.y <= 0 + self.size:
+            self.y = 0 + self.size
+            self.vy *= -1
+
         # y bottom bounce
         if self.y >= height - self.size:
             self.y = height - self.size
@@ -80,10 +85,11 @@ class Particle(object):
             else:
                 self.vy = 0
 
+        # x linear slow
         if self.vx > 0:
-            self.vx -= 0.01    # linear slow
+            self.vx -= 0.01
         elif self.vx < 0:
-            self.vx += 0.01    # linear slow
+            self.vx += 0.01
         
         # x max speed
         if self.vx > 5:
