@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-from random import randint
 import tkinter as tk
 
 class Ball(object):
@@ -42,7 +41,6 @@ class Ball(object):
 
         # y top bounce
         if self.y <= 0 + self.size:
-            print("top")
             self.y = 0 + self.size
             self.vy *= -1
 
@@ -74,14 +72,14 @@ WHITE = (255,255,255)
 pygame.init()
 win = pygame.display.set_mode((width, height), RESIZABLE)
 font = pygame.font.Font(None, 20)
-ball = Ball(randint(20,width-20),randint(20,height-20),10)
+ball = Ball(width/4,height/2,10)
 
 def main():
     global width, height
     running = True
     
     pygame.display.set_caption("Gravity")
-    settings_label = font.render("Press S for settings", 1, BLACK)
+    settings_label = font.render("Press S for settings. Arrows for movement", 1, BLACK)
     pygame.display.flip()
 
     while running:
@@ -105,7 +103,7 @@ def main():
             if int(ball.y) == height - ball.size:
                 ball.vy = -ball.jump_speed
         if keys[pygame.K_DOWN]:
-            ball.vy += 0.05
+            ball.vy += 0.3
         if keys[pygame.K_s]:
             settings(ball)
 
