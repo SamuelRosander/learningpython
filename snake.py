@@ -21,11 +21,11 @@ class Snake(object):
 		self.vy = vy
 
 	def checkcrash(self,w,h,tail):
-		""" returns true if next move puts head outside window """
+		""" returns true if next move puts head outside window or in tail """
 		if self.x + self.vx >= w / 20 or self.x + self.vx < 0 or self.y + self.vy >= h / 20 or self.y + self.vy < 0:
 			return True
 		for i,t in enumerate(tail):
-			if self.x + self.vx == t["x"] and self.y + self.vy == t["y"] and i > 0:
+			if self.x + self.vx == t["x"] and self.y + self.vy == t["y"] and i > 0: # i > 0 to prevent collision with the last tail piece that will move 
 				return True
 		return False
 			
@@ -46,7 +46,6 @@ tail = []
 pygame.display.flip()
 
 def main():
-	global snake, tail
 	running = True
 	game_over = False
 	keys_locked = False # to prevent going backwards by tapping two keys fast in sequence
@@ -90,7 +89,7 @@ def main():
 					spawn_food()
 					tail.append({"x" : snake.x, "y" : snake.y})
 				else: # shift the tail pieces on position in the list
-					for i, tailpart in enumerate(tail):
+					for i, t in enumerate(tail):
 						if i < len(tail)-1:
 							tail[i] = tail[i+1]
 						else:
@@ -100,8 +99,8 @@ def main():
 				snake.move()
 				snake.draw(BLACK)
 
-				for tailpart in tail: #draw the tail
-					pygame.draw.rect(win, BLACK, [tailpart["x"]*20, tailpart["y"]*20, 20, 20]) 
+				for t in tail: #draw the tail
+					pygame.draw.rect(win, BLACK, [t["x"]*20, t["y"]*20, 20, 20]) 
 
 				pygame.draw.circle(win, BLACK, (foodx*20+10,foody*20+10), 10) # draw the food
 				pygame.display.update()
