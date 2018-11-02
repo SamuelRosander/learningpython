@@ -6,11 +6,8 @@ class Snakehead(object):
 	def __init__(self,x,y):
 		self.x = x
 		self.y = y
-		self.vx = 1
-		self.vy = 0
-
-	def draw(self, color):
-		pygame.draw.rect(win, color, [self.x*20, self.y*20, 20, 20])
+		self.vx = 1 # velocity x axis
+		self.vy = 0 # velocity y axis
 
 	def move(self):
 		self.x += self.vx
@@ -21,7 +18,7 @@ class Snakehead(object):
 		self.vy = vy
 
 	def checkcrash(self, w, h, tail):
-		""" returns true if next move puts head outside window or in tail """
+		""" returns true if head is outside windows or in tail next frame """
 		if self.x + self.vx >= w / 20 or self.x + self.vx < 0 or self.y + self.vy >= h / 20 or self.y + self.vy < 0:
 			return True
 		for i,t in enumerate(tail):
@@ -32,7 +29,7 @@ class Snakehead(object):
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 RED = (255,0,0)
-DARKRED  = (128,0,0)
+GRAY  = (80,80,80)
 
 pygame.init()
 
@@ -56,7 +53,7 @@ def main():
 	while running:
 		global score
 
-		#key listeners
+		# listeners
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = False
@@ -82,31 +79,22 @@ def main():
 		if not game_over:
 			keys_locked = False # activates movement key presses again
 
-			# had to do the if blocks this way to get the scoring correct if you die just after eating near a wall
+			tail.append({"x" : snake.x, "y" : snake.y}) # add current head to tail to move the tail 1 step forward
+
 			if snake.x == foodx and snake.y == foody: # if food gets eaten
 				spawn_food()
-				tail.append({"x" : snake.x, "y" : snake.y}) # add current head to tail
 				score += 1
-				if snake.checkcrash(width, height, tail):
-					game_over = True
-					draw_game_over_frame()
-				else:
-			 		snake.move()
-			 		draw_frame()
-			else:
-				if snake.checkcrash(width, height, tail):
-					game_over = True
-					draw_game_over_frame()
-				else:
-					for i, t in enumerate(tail):
-						if i < len(tail)-1:
-							tail[i] = tail[i+1] # move the tail by shifting the pieces one position in the list
-						else:
-							tail[i] = {"x" : snake.x, "y" : snake.y} # last tail piece (closest to head) gets the value of the head
-					snake.move()
-					draw_frame()
+			elif not snake.checkcrash(width, height, tail): # checkcrash to have the correct tail drawn when game is over
+				del tail[0] # remove last tail piece to move the tail if no food is eaten
 
-		pygame.time.delay(100)
+			if snake.checkcrash(width, height, tail): # if next frame will be a crash
+				game_over = True
+				draw_game_over_frame()
+			else:
+				snake.move() # move the head
+				draw_frame()
+
+		pygame.time.delay(80)
 
 	pygame.quit()
 
@@ -118,7 +106,6 @@ def restart_game():
 	tail = []
 	score = 0
 
-#
 def spawn_food():
 	""" generates a new random location for the food, checking if its already been occupied by the tail """
 	global foodx, foody
@@ -133,27 +120,29 @@ def spawn_food():
 			break
 
 def draw_frame():
+	""" draws a normal game frame """
 	win.fill(WHITE)
 
-	snake.draw(BLACK) # head
+	pygame.draw.circle(win, BLACK, (foodx*20+10,foody*20+10), 10) # food
 	for t in tail:
 		pygame.draw.rect(win, BLACK, [t["x"]*20, t["y"]*20, 20, 20]) # tail
-	pygame.draw.circle(win, BLACK, (foodx*20+10,foody*20+10), 10) # food
+	pygame.draw.rect(win, BLACK, [snake.x*20, snake.y*20, 20, 20]) # head
 
 	pygame.display.update()
 
 def draw_game_over_frame():
+	""" draws the frame when game is over """
 	win.fill(WHITE)
 
-	pygame.draw.circle(win, BLACK, (foodx*20+10,foody*20+10), 10)
+	pygame.draw.circle(win, BLACK, (foodx*20+10,foody*20+10), 10) # food
 	for t in tail:
-		pygame.draw.rect(win, BLACK, [t["x"]*20, t["y"]*20, 20, 20])
-	snake.draw(RED)
+		pygame.draw.rect(win, BLACK, [t["x"]*20, t["y"]*20, 20, 20]) # tail
+	pygame.draw.rect(win, RED, [snake.x*20, snake.y*20, 20, 20]) # head
 	
-	gameover_label = font.render("Game over. Your score: {0}".format(score), 1, DARKRED)
-	restart_label = font.render("Press SPACE to restart", 1, DARKRED)
-	gameover_label_rect = gameover_label.get_rect(center=(width/2, 100))
-	restart_label_rect = restart_label.get_rect(center=(width/2,130))
+	gameover_label = font.render("Game over. Your score: {0}".format(score), 1, GRAY)
+	restart_label = font.render("Press SPACE to restart", 1, GRAY)
+	gameover_label_rect = gameover_label.get_rect(center=(width/2, 100)) # center the text
+	restart_label_rect = restart_label.get_rect(center=(width/2,130)) # center the text
 	win.blit(gameover_label, gameover_label_rect)
 	win.blit(restart_label, restart_label_rect)
 	
