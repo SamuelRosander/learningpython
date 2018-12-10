@@ -17,15 +17,6 @@ class Snakehead(object):
 		self.vx = vx
 		self.vy = vy
 
-	def checkcrash(self, w, h, tail):
-		""" returns true if head is outside windows or in tail next frame """
-		if self.x + self.vx >= w / 20 or self.x + self.vx < 0 or self.y + self.vy >= h / 20 or self.y + self.vy < 0:
-			return True
-		for i,t in enumerate(tail):
-			if self.x + self.vx == t["x"] and self.y + self.vy == t["y"] and i > 0: # i > 0 to prevent collision with the last tail piece that will move 
-				return True
-		return False
-			
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 RED = (255,0,0)
@@ -36,7 +27,7 @@ pygame.init()
 (width, height) = (400,400)
 (foodx, foody) = (0,0)
 snake = Snakehead(2,9)
-tail = []
+tail = [] # highest index are closest to head
 score = 0
 win = pygame.display.set_mode((width,height))
 font = pygame.font.Font(None, 30)
@@ -84,10 +75,10 @@ def main():
 			if snake.x == foodx and snake.y == foody: # if food gets eaten
 				spawn_food()
 				score += 1
-			elif not snake.checkcrash(width, height, tail): # checkcrash to have the correct tail drawn when game is over
+			elif not checkcrash(snake, tail): # checkcrash to have the correct tail drawn when game is over
 				del tail[0] # remove last tail piece to move the tail if no food is eaten
 
-			if snake.checkcrash(width, height, tail): # if next frame will be a crash
+			if checkcrash(snake, tail): # if next frame will be a crash
 				game_over = True
 				draw_game_over_frame()
 			else:
@@ -119,6 +110,15 @@ def spawn_food():
 			foody = randy
 			break
 
+def checkcrash(head, tail):
+	""" returns true if head is outside windows or in tail next frame """
+	if head.x + head.vx >= width / 20 or head.x + head.vx < 0 or head.y + head.vy >= height / 20 or head.y + head.vy < 0:
+		return True
+	for i,t in enumerate(tail):
+		if head.x + head.vx == t["x"] and head.y + head.vy == t["y"] and i > 0: # i > 0 to prevent collision with the last tail piece that will move
+			return True
+	return False
+
 def draw_frame():
 	""" draws a normal game frame """
 	win.fill(WHITE)
@@ -138,14 +138,14 @@ def draw_game_over_frame():
 	for t in tail:
 		pygame.draw.rect(win, BLACK, [t["x"]*20, t["y"]*20, 20, 20]) # tail
 	pygame.draw.rect(win, RED, [snake.x*20, snake.y*20, 20, 20]) # head
-	
+
 	gameover_label = font.render("Game over. Your score: {0}".format(score), 1, GRAY)
 	restart_label = font.render("Press SPACE to restart", 1, GRAY)
 	gameover_label_rect = gameover_label.get_rect(center=(width/2, 100)) # center the text
 	restart_label_rect = restart_label.get_rect(center=(width/2,130)) # center the text
 	win.blit(gameover_label, gameover_label_rect)
 	win.blit(restart_label, restart_label_rect)
-	
+
 	pygame.display.update()
 
 main()
