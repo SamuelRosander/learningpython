@@ -1,6 +1,5 @@
 import pygame
 from random import randint
-from math import floor
 
 class Snakehead(object):
 	def __init__(self,x,y):
@@ -26,7 +25,7 @@ pygame.init()
 
 (width, height) = (400,400)
 (foodx, foody) = (0,0)
-snake = Snakehead(2,9)
+head = Snakehead(2,9)
 tail = [] # highest index are closest to head
 score = 0
 win = pygame.display.set_mode((width,height))
@@ -54,35 +53,35 @@ def main():
 					restart_game()
 				if event.key == pygame.K_ESCAPE:
 					running = False
-				if event.key == pygame.K_LEFT and snake.vx != 1 and not keys_locked:
+				if event.key == pygame.K_LEFT and head.vx != 1 and not keys_locked:
 					keys_locked = True
-					snake.changedir(-1,0)
-				if event.key == pygame.K_RIGHT and snake.vx != -1 and not keys_locked:
+					head.changedir(-1,0)
+				if event.key == pygame.K_RIGHT and head.vx != -1 and not keys_locked:
 					keys_locked = True
-					snake.changedir(1,0)
-				if event.key == pygame.K_UP and snake.vy != 1 and not keys_locked:
+					head.changedir(1,0)
+				if event.key == pygame.K_UP and head.vy != 1 and not keys_locked:
 					keys_locked = True
-					snake.changedir(0,-1)
-				if event.key == pygame.K_DOWN and snake.vy != -1 and not keys_locked:
+					head.changedir(0,-1)
+				if event.key == pygame.K_DOWN and head.vy != -1 and not keys_locked:
 					keys_locked = True
-					snake.changedir(0,1)
+					head.changedir(0,1)
 
 		if not game_over:
 			keys_locked = False # activates movement key presses again
 
-			tail.append({"x" : snake.x, "y" : snake.y}) # add current head to tail to move the tail 1 step forward
+			tail.append({"x" : head.x, "y" : head.y}) # add current head to tail to move the tail 1 step forward
 
-			if snake.x == foodx and snake.y == foody: # if food gets eaten
+			if head.x == foodx and head.y == foody: # if food gets eaten
 				spawn_food()
 				score += 1
-			elif not checkcrash(snake, tail): # checkcrash to have the correct tail drawn when game is over
+			elif not checkcrash(): # checkcrash to have the correct tail drawn when game is over
 				del tail[0] # remove last tail piece to move the tail if no food is eaten
 
-			if checkcrash(snake, tail): # if next frame will be a crash
+			if checkcrash(): # if next frame will be a crash
 				game_over = True
 				draw_game_over_frame()
 			else:
-				snake.move() # move the head
+				head.move() # move the head
 				draw_frame()
 
 		pygame.time.delay(80)
@@ -90,10 +89,10 @@ def main():
 	pygame.quit()
 
 def restart_game():
-	global snake, tail, score
+	global head, tail, score
 
 	spawn_food()
-	snake = Snakehead(2,9)
+	head = Snakehead(2,9)
 	tail = []
 	score = 0
 
@@ -110,7 +109,7 @@ def spawn_food():
 			foody = randy
 			break
 
-def checkcrash(head, tail):
+def checkcrash():
 	""" returns true if head is outside windows or in tail next frame """
 	if head.x + head.vx >= width / 20 or head.x + head.vx < 0 or head.y + head.vy >= height / 20 or head.y + head.vy < 0:
 		return True
@@ -126,7 +125,7 @@ def draw_frame():
 	pygame.draw.circle(win, BLACK, (foodx*20+10,foody*20+10), 10) # food
 	for t in tail:
 		pygame.draw.rect(win, BLACK, [t["x"]*20, t["y"]*20, 20, 20]) # tail
-	pygame.draw.rect(win, BLACK, [snake.x*20, snake.y*20, 20, 20]) # head
+	pygame.draw.rect(win, BLACK, [head.x*20, head.y*20, 20, 20]) # head
 
 	pygame.display.update()
 
@@ -137,7 +136,7 @@ def draw_game_over_frame():
 	pygame.draw.circle(win, BLACK, (foodx*20+10,foody*20+10), 10) # food
 	for t in tail:
 		pygame.draw.rect(win, BLACK, [t["x"]*20, t["y"]*20, 20, 20]) # tail
-	pygame.draw.rect(win, RED, [snake.x*20, snake.y*20, 20, 20]) # head
+	pygame.draw.rect(win, RED, [head.x*20, head.y*20, 20, 20]) # head
 
 	gameover_label = font.render("Game over. Your score: {0}".format(score), 1, GRAY)
 	restart_label = font.render("Press SPACE to restart", 1, GRAY)
