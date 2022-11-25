@@ -103,14 +103,6 @@ def create_pipes():
     pipes.append(Pipe(y + pipe_hole_size, height))
 
 
-def check_collision():
-    for p in pipes:
-        if p.x - player_radius < player.x < p.x + pipe_width + player_radius \
-                and p.y1 - player_radius <= player.y <= p.y2 + player_radius:
-            return True
-    return False
-
-
 def collision():
     for p in pipes:
         delta_x = player.x - max(p.x, min(player.x, p.x + pipe_width))
